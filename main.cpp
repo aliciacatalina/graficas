@@ -1,21 +1,11 @@
-//
-//  main.cpp
-//  Proyecto
-//
-//  Created by Alicia Gonzalez on 3/30/13.
-//  Copyright (c) 2013 Alicia Gonzalez. All rights reserved.
-//
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-#include <math.h>
-#include <time.h>
+#include<windows.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+#include <time.h>
+#include <GL/glut.h>
+
 #define PI 3.141592657
 #define MAXSTARS 400
 #define MAXPOS 10000
@@ -39,11 +29,11 @@ typedef struct _starRec
 } starRec;
 
 GLenum doubleBuffer;
-GLint windW = 300, windH = 300;
+GLint windW = 500, windH = 500;
 
 GLenum flag = NORMAL;
 GLint starCount = MAXSTARS / 2;
-float speed = .50;
+float speed = 1.0;
 GLint nitro = 0;
 starRec stars[MAXSTARS];
 float sinTable[MAXANGLES];
@@ -91,7 +81,7 @@ void NewStar(GLint n, GLint d)
 void RotatePoint(float *x, float *y, float rotation)
 {
     float tmpX, tmpY;
-    
+
     tmpX = *x * Cos(rotation) - *y * Sin(rotation);
     tmpY = *y * Cos(rotation) + *x * Sin(rotation);
     *x = tmpX;
@@ -102,9 +92,9 @@ void MoveStars(void)
 {
     float offset;
     GLint n;
-    
+
     offset = speed * 60.0;
-    
+
     for (n = 0; n < starCount; n++)
     {
         stars[n].x[1] = stars[n].x[0];
@@ -124,14 +114,14 @@ void MoveStars(void)
 GLenum StarPoint(GLint n)
 {
     float x0, y0;
-    
+
     x0 = stars[n].x[0] * windW / stars[n].z[0];
     y0 = stars[n].y[0] * windH / stars[n].z[0];
     RotatePoint(&x0, &y0, stars[n].rotation);
     x0 += windW / 2.0;
     y0 += windH / 2.0;
-    
-    if (x0 >= 0.0 && x0 < windW && y0 >= 0.0 && y0 < windH)
+
+    if ((x0 >= (-windW)) && x0 < windW && (y0 >= (-windH)) && y0 < windH)
     {
         return GL_TRUE;
     }
@@ -145,14 +135,14 @@ void ShowStar(GLint n)
 {
     float x0, y0, x1, y1, width;
     GLint i;
-    
-    x0 = stars[n].x[0] * windW / stars[n].z[0];
-    y0 = stars[n].y[0] * windH / stars[n].z[0];
+
+    x0 = stars[n].x[0] * windW / stars[n].z[0]-200;
+    y0 = stars[n].y[0] * windH / stars[n].z[0]-200;
     RotatePoint(&x0, &y0, stars[n].rotation);
     x0 += windW / 2.0;
     y0 += windH / 2.0;
-    
-    if (x0 >= 0.0 && x0 < windW && y0 >= 0.0 && y0 < windH)
+
+    if (x0 >= (-windW) && x0 < windW && y0 >= (-windH) && y0 < windH)
     {
         if (stars[n].type == STREAK)
         {
@@ -161,10 +151,10 @@ void ShowStar(GLint n)
             RotatePoint(&x1, &y1, stars[n].rotation);
             x1 += windW / 2.0;
             y1 += windH / 2.0;
-            
+
             glLineWidth(MAXPOS / 100.0 / stars[n].z[0] + 1.0);
             glColor3f(1.0, (MAXWARP - speed) / MAXWARP, (MAXWARP - speed) / MAXWARP);
-            if (fabs(x0 - x1) < 1.0 && fabs(y0 - y1) < 1.0)
+            if ((x0 - x1) < -1.0 && (y0 - y1) < -1.0)
             {
                 glBegin(GL_POINTS);
                 glVertex2f(x0, y0);
@@ -197,9 +187,9 @@ void ShowStar(GLint n)
 void UpdateStars(void)
 {
     GLint n;
-    
+
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     for (n = 0; n < starCount; n++)
     {
         if (stars[n].z[0] > speed || (stars[n].z[0] > 0.0 && speed < MAXWARP))
@@ -219,9 +209,9 @@ void UpdateStars(void)
 void ShowStars(void)
 {
     GLint n;
-    
+
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     for (n = 0; n < starCount; n++)
     {
         if (stars[n].z[0] > speed || (stars[n].z[0] > 0.0 && speed < MAXWARP))
@@ -230,30 +220,62 @@ void ShowStars(void)
         }
     }
 }
-void myinit(void)
+
+static void Init(void)
 {
-    
     float angle;
     GLint n;
-    
+
     srand((unsigned int) time(NULL));
-    
+
     for (n = 0; n < MAXSTARS; n++)
     {
         NewStar(n, 100);
     }
-    
+
     angle = 0.0;
     for (n = 0; n <= MAXANGLES; n++)
     {
-        sinTable[n] = Sin(angle);
+        sinTable[n] = sin(angle);
         angle += PI / (MAXANGLES / 2.0);
     }
-    
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    
 
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+
+    glDisable(GL_DITHER);
 }
+
+void Reshape(int width, int height)
+{
+   windW = width;
+   windH = height;
+
+
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(-200, 200, -200, 200, 1.0, 200.0);
+    gluLookAt(0, 0, 1.3, 0, 0, 0, 0, 1, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+/* ARGSUSED1 */
+static void Key(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+    case ' ':
+        flag = (flag == NORMAL) ? WEIRD : NORMAL;
+        break;
+    case 't':
+        nitro = 1;
+        break;
+    case 27:
+        exit(0);
+    }
+}
+
 void Idle(void)
 {
     MoveStars();
@@ -282,23 +304,13 @@ void Idle(void)
     glutPostRedisplay();
 }
 
-void display(void)
+void Display(void)
 {
     ShowStars();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //  glMatrixMode(GL_MODELVIEW);
-    //estrellitas
-    glPointSize(5.0);
-    for(int i = 0; i<=30; i++){
-        glBegin(GL_POINTS);
-        glColor3f((double)rand()/(RAND_MAX), (double)rand()/(RAND_MAX), (double)rand()/(RAND_MAX));
-        glVertex3f(((rand()%400)-200), ((rand()%400)-200), 100.0);
-        glEnd();
-    }
-    
-    glColor3f(1.0, 1.0, 1.0);
+
     glLineWidth(10.0);
     //Camino de arriba
+    glColor3f(1.0,0.0,1.0);
     glBegin(GL_QUADS);
     glVertex3f(-10.0f, 10.0f, 0.0f);
     glVertex3f(-200.0f, 200.0f, 0.0f);
@@ -306,47 +318,22 @@ void display(void)
     glVertex3f(10.0f, 10.0f, 0.0f);
     glEnd();
     //Camino de abajo
+    glColor3f(0.0,1.0,1.0);
     glBegin(GL_QUADS);
     glVertex3f(-10.0f, -10.0f, 0.0f);
     glVertex3f(-200.0f, -200.0f, 0.0f);
     glVertex3f(200.0f, -200.0f, 0.0f);
     glVertex3f(10.0f, -10.0f, 0.0f);
     glEnd();
-    
-    glBegin(GL_LINES);
+     glBegin(GL_LINES);
     glColor3f(1.0, 0.0, 0.0);
     glVertex3f(11.0, -10.0, 0.0);
     glVertex3f(101.0, -200.0, 0.0);
     glEnd();
-    
-    glFlush();
+    glutSwapBuffers();
+
 }
 
-
-void reshape (int width, int height)
-{
-    //GLfloat aspect = (GLfloat)width / (GLfloat)height;
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-//    glOrtho(200, -200.0, -200, 200, 200, -200 );
-//    gluPerspective(45.0f, aspect, 1.0f, 200.0f);
-    glFrustum(-200, 200, -200, 200, 1.0, 200.0);
-    gluLookAt(0, 0, 6, 0, 0, 0, 0, 1, 0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
-
-static void key(unsigned char k, int x, int y)
-{
-    switch (k) {
-        case 27:  /* Escape */
-            exit(0);
-            break;
-        default:
-            return;
-    }
-}
 void Visible(int state)
 {
     if (state == GLUT_VISIBLE)
@@ -362,9 +349,9 @@ void Visible(int state)
 static void Args(int argc, char **argv)
 {
     GLint i;
-    
+
     doubleBuffer = GL_TRUE;
-    
+
     for (i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-sb") == 0)
@@ -377,19 +364,29 @@ static void Args(int argc, char **argv)
         }
     }
 }
+
 int main(int argc, char **argv)
 {
+
+
+    GLenum type;
+
+    glutInitWindowSize(windW, windH);
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(640,480);
-    glutInitWindowPosition(100,100);
-    glutCreateWindow("Proyecto Final");
-    myinit();
-    glEnable(GL_DEPTH_TEST);
-    glutReshapeFunc(reshape);
+    Args(argc, argv);
+
+    type = GLUT_RGB;
+    type |= (doubleBuffer) ? GLUT_DOUBLE : GLUT_SINGLE;
+    glutInitDisplayMode(type);
+
+    glutCreateWindow("Stars");
+
+    Init();
+
+    glutReshapeFunc(Reshape);
+    glutKeyboardFunc(Key);
     glutVisibilityFunc(Visible);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(key);
+    glutDisplayFunc(Display);
     glutMainLoop();
-    return 0;             /* ANSI C requires main to return int. */
+    return 0;
 }
