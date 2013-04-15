@@ -352,6 +352,14 @@ void Display(void)
 {
     ShowStars();
     
+    glColor3f(1.0, 0.0, 0.0);
+    glLineWidth(20.0);
+    glBegin(GL_LINES);
+    glVertex3f(0.0, 0.0, 1.0);
+    glVertex3f(0.0, -50.0, 1.0);
+    glVertex3f(-50.0, -50.0, 1.0);
+    glVertex3f(-50.0, 0.0, 1.0);
+    glEnd();
     glLineWidth(10.0);
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, zPost);
@@ -392,12 +400,14 @@ void Display(void)
     glPopMatrix();
     //cuadros
     glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_QUADS);
-    glVertex3f(100.0, 100.0, 1.0);
-    glVertex3f(100.0, 50.0, 1.0);
-    glVertex3f(150.0, 50.0, 1.0);
-    glVertex3f(100.0, 150.0, 1.0);
+    glLineWidth(20.0);
+    glBegin(GL_LINES);
+    glVertex3f(0.0, 0.0, 1.0);
+    glVertex3f(0.0, -50.0, 1.0);
+    glVertex3f(-50.0, -50.0, 1.0);
+    glVertex3f(-50.0, 0.0, 1.0);
     glEnd();
+    
     glPushMatrix();
     
     glTranslatef(sceneinfo.triangle.pos.x, sceneinfo.triangle.pos.y, 0.);
