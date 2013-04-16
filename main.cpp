@@ -380,12 +380,59 @@ void Display(void)
     glVertex3f(200.0f, -200.0f, -1000.0f);
     glEnd();
 
+     //mosaico
     glColor3f(0.0,0.0,0.0);
     glBegin(GL_QUADS);
-    glVertex3f(-200.0f, -20.0f, -1.0f);
-    glVertex3f(-200.0f, -20.0f, 1.0f);
-    glVertex3f(200.0f, -20.0f, 1.0f);
-    glVertex3f(200.0f, -20.0f, -10.0f);
+    glVertex3f(-200.0f, -195.0f, -1.0f);
+    glVertex3f(-200.0f, -190.0f, 1.0f);
+    glVertex3f(-150.0f, -190.0f, 1.0f);
+    glVertex3f(-150.0f, -195.0f, -1.0f);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glVertex3f(-100.0f, -195.0f, -1.0f);
+    glVertex3f(-100.0f, -190.0f, 1.0f);
+    glVertex3f(-50.0f, -190.0f, 1.0f);
+    glVertex3f(-50.0f, -195.0f, -1.0f);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glVertex3f(50.0f, -195.0f, -1.0f);
+    glVertex3f(50.0f, -190.0f, 1.0f);
+    glVertex3f(100.0f, -190.0f, 1.0f);
+    glVertex3f(100.0f, -195.0f, -1.0f);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glVertex3f(150.0f, -195.0f, -1.0f);
+    glVertex3f(150.0f, -190.0f, 1.0f);
+    glVertex3f(200.0f, -190.0f, 1.0f);
+    glVertex3f(200.0f, -195.0f, -1.0f);
+    glEnd();
+
+    //mosaico color
+     glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glVertex3f(-150.0f, -155.0f, -1.0f);
+    glVertex3f(-150.0f, -150.0f, 1.0f);
+    glVertex3f(-100.0f, -150.0f, 1.0f);
+    glVertex3f(-100.0f, -155.0f, -1.0f);
+    glEnd();
+
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glVertex3f(-50.0f, -155.0f, -1.0f);
+    glVertex3f(-50.0f, -150.0f, 1.0f);
+    glVertex3f(0.0f, -150.0f, 1.0f);
+    glVertex3f(0.0f, -155.0f, -1.0f);
+    glEnd();
+
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glVertex3f(100.0f, -155.0f, -1.0f);
+    glVertex3f(100.0f, -150.0f, 1.0f);
+    glVertex3f(150.0f, -150.0f, 1.0f);
+    glVertex3f(150.0f, -155.0f, -1.0f);
     glEnd();
     //lineas de camino arriba
     glLineWidth(3.0);
