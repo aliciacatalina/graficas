@@ -1,9 +1,12 @@
-#include<windows.h>
+//#include<windows.h>
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "fmod.h"
+#include "fmod_errors.h"
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -16,6 +19,10 @@
 #define MAXWARP 10
 #define MAXANGLES 6000
 static GLfloat zPost = 0.0f;
+static GLfloat zTiles = 0.0f;
+double posGame = -0.7;
+char game[] = {'G','A','M','E','O','V','E','R'};
+
 enum
 {
     NORMAL = 0,
@@ -34,7 +41,7 @@ typedef struct _starRec
 
 GLfloat triangle_vertices[] =
 {
-
+    
     -20.0,-255.0,0.0,
     20.0, -255.0,0.0,
     0.0,  -200.0,0.0,
@@ -65,10 +72,11 @@ float sinTable[MAXANGLES];
 void timer(int value)
 {
     zPost = zPost + .50;
+    zTiles = zTiles + .10;
     glutPostRedisplay();
-    glutTimerFunc(300,timer,0);
-
-
+    glutTimerFunc(1000,timer,0);
+    
+    
 }
 float Sin(float angle)
 {
@@ -113,7 +121,7 @@ void NewStar(GLint n, GLint d)
 void RotatePoint(float *x, float *y, float rotation)
 {
     float tmpX, tmpY;
-
+    
     tmpX = *x * Cos(rotation) - *y * Sin(rotation);
     tmpY = *y * Cos(rotation) + *x * Sin(rotation);
     *x = tmpX;
@@ -124,9 +132,9 @@ void MoveStars(void)
 {
     float offset;
     GLint n;
-
+    
     offset = speed * 60.0;
-
+    
     for (n = 0; n < starCount; n++)
     {
         stars[n].x[1] = stars[n].x[0];
@@ -146,13 +154,13 @@ void MoveStars(void)
 GLenum StarPoint(GLint n)
 {
     float x0, y0;
-
+    
     x0 = stars[n].x[0] * windW / stars[n].z[0];
     y0 = stars[n].y[0] * windH / stars[n].z[0];
     RotatePoint(&x0, &y0, stars[n].rotation);
     x0 += windW / 2.0;
     y0 += windH / 2.0;
-
+    
     if ((x0 >= (-windW)) && x0 < windW && (y0 >= (-windH)) && y0 < windH)
     {
         return GL_TRUE;
@@ -167,13 +175,13 @@ void ShowStar(GLint n)
 {
     float x0, y0, x1, y1, width;
     GLint i;
-
+    
     x0 = stars[n].x[0] * windW / stars[n].z[0]-250;
     y0 = stars[n].y[0] * windH / stars[n].z[0]-250;
     RotatePoint(&x0, &y0, stars[n].rotation);
     x0 += windW / 2.0;
     y0 += windH / 2.0;
-
+    
     if (x0 >= (-windW) && x0 < windW && y0 >= (-windH) && y0 < windH)
     {
         if (stars[n].type == STREAK)
@@ -183,7 +191,7 @@ void ShowStar(GLint n)
             RotatePoint(&x1, &y1, stars[n].rotation);
             x1 += windW / 2.0;
             y1 += windH / 2.0;
-
+            
             glLineWidth(MAXPOS / 100.0 / stars[n].z[0] + 1.0);
             glColor3f(1.0, (MAXWARP - speed) / MAXWARP, (MAXWARP - speed) / MAXWARP);
             if ((x0 - x1) < -1.0 && (y0 - y1) < -1.0)
@@ -219,9 +227,9 @@ void ShowStar(GLint n)
 void UpdateStars(void)
 {
     GLint n;
-
+    
     glClear(GL_COLOR_BUFFER_BIT);
-
+    
     for (n = 0; n < starCount; n++)
     {
         if (stars[n].z[0] > speed || (stars[n].z[0] > 0.0 && speed < MAXWARP))
@@ -241,9 +249,9 @@ void UpdateStars(void)
 void ShowStars(void)
 {
     GLint n;
-
+    
     glClear(GL_COLOR_BUFFER_BIT);
-
+    
     for (n = 0; n < starCount; n++)
     {
         if (stars[n].z[0] > speed || (stars[n].z[0] > 0.0 && speed < MAXWARP))
@@ -257,23 +265,23 @@ static void Init(void)
 {
     float angle;
     GLint n;
-
+    
     srand((unsigned int) time(NULL));
-
+    
     for (n = 0; n < MAXSTARS; n++)
     {
         NewStar(n, 100);
     }
-
+    
     angle = 0.0;
     for (n = 0; n <= MAXANGLES; n++)
     {
         sinTable[n] = sin(angle);
         angle += PI / (MAXANGLES / 2.0);
     }
-
+    
     glClearColor(0.0, 0.0, 0.0, 0.0);
-
+    
     glDisable(GL_DITHER);
 }
 
@@ -281,8 +289,8 @@ void Reshape(int width, int height)
 {
     windW = width;
     windH = height;
-
-
+    
+    
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -312,10 +320,10 @@ void special(int key, int x, int y)
     switch(key)
     {
         case GLUT_KEY_LEFT:
-            sceneinfo.triangle.pos.x -= 1.0;
+            sceneinfo.triangle.pos.x -= 5.0;
             break;
         case GLUT_KEY_RIGHT:
-            sceneinfo.triangle.pos.x += 1.0;
+            sceneinfo.triangle.pos.x += 5.0;
             break;
     }
     glutPostRedisplay();
@@ -348,19 +356,21 @@ void Idle(void)
     glutPostRedisplay();
 }
 
+void GameOver(void){
+    glPushMatrix();
+    glTranslatef(0.0, 0.0, 0.0);
+    glColor3f(1.0, 0.0, 0.0);
+    for(int i=0; i<8; i++) {
+        glRasterPos3f(posGame,0.0, 0.0);
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, game[i]);
+        posGame+=0.2;
+        glPopMatrix();
+    }
+}
 void Display(void)
 {
     ShowStars();
-
-    glColor3f(1.0, 0.0, 0.0);
-    glLineWidth(20.0);
-    glBegin(GL_LINES);
-    glVertex3f(0.0, 0.0, 1.0);
-    glVertex3f(0.0, -50.0, 1.0);
-    glVertex3f(-50.0, -50.0, 1.0);
-    glVertex3f(-50.0, 0.0, 1.0);
-    glEnd();
-    glLineWidth(10.0);
+    
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, zPost);
     //Camino de arriba
@@ -379,61 +389,7 @@ void Display(void)
     glVertex3f(200.0f, -200.0f, 1.0f);
     glVertex3f(200.0f, -200.0f, -1000.0f);
     glEnd();
-
-     //mosaico
-    glColor3f(0.0,0.0,0.0);
-    glBegin(GL_QUADS);
-    glVertex3f(-200.0f, -195.0f, -1.0f);
-    glVertex3f(-200.0f, -190.0f, 1.0f);
-    glVertex3f(-150.0f, -190.0f, 1.0f);
-    glVertex3f(-150.0f, -195.0f, -1.0f);
-    glEnd();
-
-    glBegin(GL_QUADS);
-    glVertex3f(-100.0f, -195.0f, -1.0f);
-    glVertex3f(-100.0f, -190.0f, 1.0f);
-    glVertex3f(-50.0f, -190.0f, 1.0f);
-    glVertex3f(-50.0f, -195.0f, -1.0f);
-    glEnd();
-
-    glBegin(GL_QUADS);
-    glVertex3f(50.0f, -195.0f, -1.0f);
-    glVertex3f(50.0f, -190.0f, 1.0f);
-    glVertex3f(100.0f, -190.0f, 1.0f);
-    glVertex3f(100.0f, -195.0f, -1.0f);
-    glEnd();
-
-    glBegin(GL_QUADS);
-    glVertex3f(150.0f, -195.0f, -1.0f);
-    glVertex3f(150.0f, -190.0f, 1.0f);
-    glVertex3f(200.0f, -190.0f, 1.0f);
-    glVertex3f(200.0f, -195.0f, -1.0f);
-    glEnd();
-
-    //mosaico color
-     glColor3f(1.0,0.0,1.0);
-    glBegin(GL_QUADS);
-    glVertex3f(-150.0f, -155.0f, -1.0f);
-    glVertex3f(-150.0f, -150.0f, 1.0f);
-    glVertex3f(-100.0f, -150.0f, 1.0f);
-    glVertex3f(-100.0f, -155.0f, -1.0f);
-    glEnd();
-
-    glColor3f(1.0,0.0,1.0);
-    glBegin(GL_QUADS);
-    glVertex3f(-50.0f, -155.0f, -1.0f);
-    glVertex3f(-50.0f, -150.0f, 1.0f);
-    glVertex3f(0.0f, -150.0f, 1.0f);
-    glVertex3f(0.0f, -155.0f, -1.0f);
-    glEnd();
-
-    glColor3f(1.0,0.0,1.0);
-    glBegin(GL_QUADS);
-    glVertex3f(100.0f, -155.0f, -1.0f);
-    glVertex3f(100.0f, -150.0f, 1.0f);
-    glVertex3f(150.0f, -150.0f, 1.0f);
-    glVertex3f(150.0f, -155.0f, -1.0f);
-    glEnd();
+        
     //lineas de camino arriba
     glLineWidth(3.0);
     glBegin(GL_LINES);
@@ -453,30 +409,150 @@ void Display(void)
     }
     glEnd();
     glPopMatrix();
-    //cuadros
-    glColor3f(1.0, 0.0, 0.0);
-    glLineWidth(20.0);
-    glBegin(GL_LINES);
-    glVertex3f(0.0, 0.0, 1.0);
-    glVertex3f(0.0, -50.0, 1.0);
-    glVertex3f(-50.0, -50.0, 1.0);
-    glVertex3f(-50.0, 0.0, 1.0);
+    //mosaico primer nivel
+    glPushMatrix();
+    glTranslatef(0.0, 0.0, zPost);
+    glColor3f(0.0,0.0,0.0);
+    glBegin(GL_QUADS);
+    glVertex3f(-200.0f, -195.0f, -1.0f);
+    glVertex3f(-200.0f, -190.0f, 1.0f);
+    glVertex3f(-150.0f, -190.0f, 1.0f);
+    glVertex3f(-150.0f, -195.0f, -1.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(-100.0f, -195.0f, -1.0f);
+    glVertex3f(-100.0f, -190.0f, 1.0f);
+    glVertex3f(-50.0f, -190.0f, 1.0f);
+    glVertex3f(-50.0f, -195.0f, -1.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(50.0f, -195.0f, -1.0f);
+    glVertex3f(50.0f, -190.0f, 1.0f);
+    glVertex3f(100.0f, -190.0f, 1.0f);
+    glVertex3f(100.0f, -195.0f, -1.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(150.0f, -195.0f, -1.0f);
+    glVertex3f(150.0f, -190.0f, 1.0f);
+    glVertex3f(200.0f, -190.0f, 1.0f);
+    glVertex3f(200.0f, -195.0f, -1.0f);
+    glEnd();
+    //mosaico segundo nivel
+    glBegin(GL_QUADS);
+    glVertex3f(-200.0f, -195.0f, -4.0f);
+    glVertex3f(-200.0f, -190.0f, -2.0f);
+    glVertex3f(-150.0f, -190.0f, -2.0f);
+    glVertex3f(-150.0f, -195.0f, -4.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(-100.0f, -195.0f, -4.0f);
+    glVertex3f(-100.0f, -190.0f, -2.0f);
+    glVertex3f(-50.0f, -190.0f, -2.0f);
+    glVertex3f(-50.0f, -195.0f, -4.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(50.0f, -195.0f, -4.0f);
+    glVertex3f(50.0f, -190.0f, -2.0f);
+    glVertex3f(100.0f, -190.0f, -2.0f);
+    glVertex3f(100.0f, -195.0f, -4.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(150.0f, -195.0f, -4.0f);
+    glVertex3f(150.0f, -190.0f, -2.0f);
+    glVertex3f(200.0f, -190.0f, -2.0f);
+    glVertex3f(200.0f, -195.0f, -4.0f);
+    glEnd();
+    
+    //mosaicos tercer nivel
+    glBegin(GL_QUADS);
+    glVertex3f(-200.0f, -195.0f, -10.0f);
+    glVertex3f(-200.0f, -190.0f, -8.0f);
+    glVertex3f(-150.0f, -190.0f, -8.0f);
+    glVertex3f(-150.0f, -195.0f, -10.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(-100.0f, -195.0f, -10.0f);
+    glVertex3f(-100.0f, -190.0f, -8.0f);
+    glVertex3f(-50.0f, -190.0f, -8.0f);
+    glVertex3f(-50.0f, -195.0f, -10.0f);
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex3f(50.0f, -195.0f, -10.0f);
+    glVertex3f(50.0f, -190.0f, -8.0f);
+    glVertex3f(100.0f, -190.0f, -8.0f);
+    glVertex3f(100.0f, -195.0f, -10.0f);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex3f(150.0f, -195.0f, -10.0f);
+    glVertex3f(150.0f, -190.0f, -8.0f);
+    glVertex3f(200.0f, -190.0f, -8.0f);
+    glVertex3f(200.0f, -195.0f, -10.0f);
+    glEnd();
+    //mosaico color
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glVertex3f(-150.0f, -155.0f, -1.0f);
+    glVertex3f(-150.0f, -150.0f, 1.0f);
+    glVertex3f(-100.0f, -150.0f, 1.0f);
+    glVertex3f(-100.0f, -155.0f, -1.0f);
+    glEnd();
+    
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glVertex3f(-50.0f, -155.0f, -1.0f);
+    glVertex3f(-50.0f, -150.0f, 1.0f);
+    glVertex3f(0.0f, -150.0f, 1.0f);
+    glVertex3f(0.0f, -155.0f, -1.0f);
+    glEnd();
+    
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glVertex3f(100.0f, -155.0f, -1.0f);
+    glVertex3f(100.0f, -150.0f, 1.0f);
+    glVertex3f(150.0f, -150.0f, 1.0f);
+    glVertex3f(150.0f, -155.0f, -1.0f);
     glEnd();
 
+    glPopMatrix();
+    
     glPushMatrix();
-
+    
     glTranslatef(sceneinfo.triangle.pos.x, sceneinfo.triangle.pos.y, 0.);
     glRotatef(sceneinfo.triangle.rot, 0, 0, 0);
-
+    
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, triangle_vertices);
     glColor3f(1.0,0.0,0.0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-
+    
     glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0.0, 0.0, 0.0);
+    if(sceneinfo.triangle.pos.x == 100.0 || (150.0 && zPost == -2.0)){
+        std::cout << "collision";
+        //GameOver();
 
+    }
+    glPopMatrix();
+//    std::cout << "X=";
+//    std::cout << sceneinfo.triangle.pos.x;
+//    std::cout << ",";
+//    std::cout << "Y=";
+//    std::cout << sceneinfo.triangle.pos.y;
+//    std::cout << ",";
+//    std::cout << "Z=";
+//    std::cout << sceneinfo.triangle.pos.z;
     glutSwapBuffers();
-
+    
 }
 
 void Visible(int state)
@@ -494,9 +570,9 @@ void Visible(int state)
 static void Args(int argc, char **argv)
 {
     GLint i;
-
+    
     doubleBuffer = GL_TRUE;
-
+    
     for (i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-sb") == 0)
@@ -512,22 +588,22 @@ static void Args(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-
-
+    
+    
     GLenum type;
-
+    
     glutInitWindowSize(windW, windH);
     glutInit(&argc, argv);
     Args(argc, argv);
-
+    
     type = GLUT_RGB;
     type |= (doubleBuffer) ? GLUT_DOUBLE : GLUT_SINGLE;
     glutInitDisplayMode(type);
-
+    
     glutCreateWindow("Stars");
-
+    
     Init();
-
+    
     glutReshapeFunc(Reshape);
     glutKeyboardFunc(Key);
     glutSpecialFunc(special);
