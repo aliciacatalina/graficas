@@ -19,10 +19,21 @@
 #define MAXWARP 10
 #define MAXANGLES 6000
 static GLfloat zPost = 0.0f;
-static GLfloat zTiles = 0.0f;
 double posGame = -0.7;
 char game[] = {'G','A','M','E','O','V','E','R'};
-
+GLfloat collisionsX[] = {-150.0, //primer nivel
+                        -50.0,
+                        50.0,
+                        150.0,
+                        -150.0,//segundo nivel
+                        -50.0,
+                        50.0,
+                        150.0
+                        -150.0,//tercer nivel
+                        -50.0,
+                        50.0,
+                        150.0};
+GLfloat collisionsZ[] = {1.0, 1.0, 1.0, 1.0, -2.0, -2.0, -2.0, -2.0, -8.0, -8.0, -8.0, -8.0};
 enum
 {
     NORMAL = 0,
@@ -72,9 +83,18 @@ float sinTable[MAXANGLES];
 void timer(int value)
 {
     zPost = zPost + .50;
-    zTiles = zTiles + .10;
+    //zTiles = zTiles + .10;
+    for(int i =0; i<=12;i++){
+        if(sceneinfo.triangle.pos.x == collisionsX[i] && zPost == collisionsZ[i]){
+            std::cout << "zpost ";
+            std::cout << zPost;
+            std::cout << "posarray ";
+            std::cout << collisionsZ[i];
+            std::cout << "collision";
+        }
+    }
     glutPostRedisplay();
-    glutTimerFunc(1000,timer,0);
+    glutTimerFunc(300,timer,0);
     
     
 }
@@ -364,13 +384,23 @@ void GameOver(void){
         glRasterPos3f(posGame,0.0, 0.0);
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, game[i]);
         posGame+=0.2;
-        glPopMatrix();
     }
+        glPopMatrix();
+//        for(int i = 0; i<=12; i++){
+//            if(sceneinfo.triangle.pos.x == collisionsX[i] && zPost == collisionsZ[i]){
+//            std::cout << "zpost ";
+//            std::cout << zPost;
+//            std::cout << "posarray ";
+//            std::cout << collisionsZ[i];
+//            //std::cout << "collision";
+//            //GameOver();
+//             }
+        //}
 }
 void Display(void)
 {
     ShowStars();
-    
+    GameOver();
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, zPost);
     //Camino de arriba
@@ -534,14 +564,7 @@ void Display(void)
     glDrawArrays(GL_TRIANGLES, 0, 3);
     
     glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0.0, 0.0, 0.0);
-    if(sceneinfo.triangle.pos.x == 100.0 || (150.0 && zPost == -2.0)){
-        std::cout << "collision";
-        //GameOver();
 
-    }
     glPopMatrix();
 //    std::cout << "X=";
 //    std::cout << sceneinfo.triangle.pos.x;
